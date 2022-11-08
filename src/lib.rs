@@ -70,7 +70,10 @@ impl<'a, T> BumpSlab<T> {
 /// A keyed container for the BumpSlab
 pub struct Slot<'a, T>(&'a mut SlotInner<T>);
 
-pub union SlotInner<T> {
+/// The inner is a union between the value and the next item in the linked list
+///
+/// This forms a intruisive linked list which let us chase down free spots as they become available
+union SlotInner<T> {
     value: ManuallyDrop<T>,
     next: *mut SlotInner<T>,
 }
