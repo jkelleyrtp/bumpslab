@@ -1,9 +1,7 @@
-use bumpalo::boxed::Box as BumpBox;
 use bumpalo::Bump;
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::marker::PhantomData;
 use std::mem::ManuallyDrop;
-use std::ptr::{null, null_mut};
 
 pub struct BumpSlab<T: Sized> {
     bump: Bump,
@@ -15,7 +13,7 @@ impl<'a, T> BumpSlab<T> {
     pub fn new() -> Self {
         Self {
             bump: Bump::new(),
-            next: Cell::new(null_mut()),
+            next: Cell::new(std::ptr::null_mut()),
             _p: PhantomData,
         }
     }
@@ -33,7 +31,7 @@ impl<'a, T> BumpSlab<T> {
         let available = unsafe { &mut *(current as *mut SlotInner<T>) };
         unsafe {
             if available.next.is_null() {
-                self.next.set(null_mut());
+                self.next.set(std::ptr::null_mut());
             } else {
                 self.next.set(available.next as *mut ());
             }
@@ -43,6 +41,7 @@ impl<'a, T> BumpSlab<T> {
         Slot(available)
     }
 
+    /// Acquire the internal bump allocator
     pub fn bump(&self) -> &Bump {
         &self.bump
     }
@@ -68,6 +67,7 @@ impl<'a, T> BumpSlab<T> {
     }
 }
 
+/// A keyed container for the BumpSlab
 pub struct Slot<'a, T>(&'a mut SlotInner<T>);
 
 pub union SlotInner<T> {
@@ -78,6 +78,10 @@ pub union SlotInner<T> {
 impl<T> Slot<'_, T> {
     pub fn ptr(&self) -> *const T {
         unsafe { &*self.0.value }
+    }
+
+    pub fn ptr_mut(&self) -> *mut T {
+        unsafe { &*self.0.value as *const T as *mut T }
     }
 }
 
