@@ -2,8 +2,15 @@
 name = "bumpslab"
 version = "0.1.0"
 edition = "2021"
+description = "A slab allocator with stable references"
+repository = "https://github.com/jkelleyrtp/bumpslab"
+keywords = ["memory", "layout", "allocator", "slab"]
+categories = ["memory-management"]
+license = "MIT"
+authors = ["Jonathan Kelley <jkelleyrtp@gmail.com>"]
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bumpalo = { version = "3.11.1", features = ["boxed"] }
+bumpalo = { version = "3.11.1" }
