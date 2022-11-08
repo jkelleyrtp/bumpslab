@@ -1,5 +1,8 @@
 # BumpSlab: A bump allocator with reusable slots
 
+[![crates.io](https://img.shields.io/crates/v/bumpslab.svg)](https://crates.io/crates/bumpslab)
+
+
 A bumpslab is a slab that provides stable references for items inside the collection.
 
 Normally, when a vec grows, its items will move around. Bumpslab is an arena allocator that gives you the pointer, not the key. This lets you chase down the pointer contents without the arena required to use the value. This means the pointer is guaranteed stable for the lifetime of the `Slot<>`
