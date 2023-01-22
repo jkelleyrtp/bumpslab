@@ -1,5 +1,5 @@
 use bumpalo::Bump;
-use std::cell::Cell;
+use std::cell::{Cell, UnsafeCell};
 use std::marker::PhantomData;
 use std::mem::ManuallyDrop;
 
@@ -24,7 +24,7 @@ impl<'a, T> BumpSlab<T> {
 
         if current.is_null() {
             return Slot(self.bump.alloc(SlotInner {
-                value: ManuallyDrop::new(value),
+                value: ManuallyDrop::new(UnsafeCell::new(value)),
             }));
         }
 
@@ -37,7 +37,7 @@ impl<'a, T> BumpSlab<T> {
             }
         }
 
-        available.value = ManuallyDrop::new(value);
+        available.value = ManuallyDrop::new(UnsafeCell::new(value));
         Slot(available)
     }
 
@@ -74,17 +74,17 @@ pub struct Slot<'a, T>(&'a mut SlotInner<T>);
 ///
 /// This forms a intruisive linked list which let us chase down free spots as they become available
 union SlotInner<T> {
-    value: ManuallyDrop<T>,
+    value: ManuallyDrop<UnsafeCell<T>>,
     next: *mut SlotInner<T>,
 }
 
 impl<T> Slot<'_, T> {
     pub fn ptr(&self) -> *const T {
-        unsafe { &*self.0.value }
+        unsafe { self.0.value.get() }
     }
 
     pub fn ptr_mut(&self) -> *mut T {
-        unsafe { &*self.0.value as *const T as *mut T }
+        unsafe { self.0.value.get() }
     }
 }
 
@@ -92,12 +92,12 @@ impl<T> std::ops::Deref for SlotInner<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.value }
+        unsafe { &*self.value.get() }
     }
 }
 
 impl<T> std::ops::DerefMut for SlotInner<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *self.value }
+        unsafe { &mut *self.value.get_mut() }
     }
 }
