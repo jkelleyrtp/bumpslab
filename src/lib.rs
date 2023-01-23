@@ -48,13 +48,9 @@ impl<'a, T> BumpSlab<T> {
         // Drop the value
         unsafe { ManuallyDrop::drop(&mut slot.0.value) };
 
-        let next = self.next.get();
-
-        if let Some(next) = next {
-            // Assign the next item in the linked list
-            // point this slot to the head, and then the bumpslab head to the new slot
-            slot.0.next = Some(next);
-        }
+        // Assign the next item in the linked list
+        // point this slot to the head, and then the bumpslab head to the new slot
+        slot.0.next = self.next.get();
         self.next.set(Some(slot.0.into()));
     }
 }
