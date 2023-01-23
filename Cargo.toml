@@ -1,6 +1,6 @@
 [package]
 name = "bumpslab"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "A slab allocator with stable references"
 repository = "https://github.com/jkelleyrtp/bumpslab"
